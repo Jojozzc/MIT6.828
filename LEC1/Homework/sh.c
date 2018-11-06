@@ -109,14 +109,48 @@ runcmd(struct cmd *cmd)
 	  close(rcmd->fd); 						//close the original file 
     if(open(rcmd->file, rcmd->mode, 0777) < 0){     //open with the new redirected file
 		  fprintf(stderr, "Try to open :%s failed\n", rcmd->file);
-		  break;
+		  exit(EXIT_SUCCESS);
 	  }
     runcmd(rcmd->cmd);
     break;
   case '|':
     pcmd = (struct pipecmd*)cmd;
-    fprintf(stderr, "pipe not implemented\n");
+    // fprintf(stderr, "pipe not implemented\n");
     // Your code here ...
+    // see "man 3 pipe example."
+    int maxBSIZE = 50;
+    int fildes[2];
+    int status = pipe(fildes);
+    if(status == -1){
+      fprintf(stderr, "pipe error.\n");
+      exit(EXIT_SUCCESS);
+    }
+    switch(fork()){
+      default: /*parent process*/
+        close(STDOUT_FILENO);
+        dup(fildes[1]);
+        close(fildes[0]);
+        close(fildes[1]);
+        runcmd(pcmd->left);
+        exit(EXIT_SUCCESS);
+      case 0:/*child process*/
+        close(STDIN_FILENO);
+        dup(fildes[0]);
+        close(fildes[0]);
+        close(fildes[1]);
+        runcmd(pcmd->right);
+        exit(EXIT_SUCCESS);
+      case -1:/*error*/
+        fprintf(stderr, "fork error\n");
+        break;
+    }
+    /*
+    struct pipecmd {
+      int type;          // |
+      struct cmd *left;  // left side of pipe
+      struct cmd *right; // right side of pipe
+    };
+    */
     break;
   }
   exit(0);
