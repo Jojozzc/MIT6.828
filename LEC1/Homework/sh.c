@@ -143,13 +143,6 @@ runcmd(struct cmd *cmd)
         fprintf(stderr, "fork error\n");
         break;
     }
-    /*
-    struct pipecmd {
-      int type;          // |
-      struct cmd *left;  // left side of pipe
-      struct cmd *right; // right side of pipe
-    };
-    */
     break;
   }
   exit(0);
