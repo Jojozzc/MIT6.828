@@ -118,7 +118,6 @@ runcmd(struct cmd *cmd)
     // fprintf(stderr, "pipe not implemented\n");
     // Your code here ...
     // see "man 3 pipe example."
-    int maxBSIZE = 50;
     int fildes[2];
     int status = pipe(fildes);
     if(status == -1){
